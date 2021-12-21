@@ -1,7 +1,10 @@
+var CACHE_STATIC_NAME = "static-v1";
+var CACHE_DYNAMIC_NAME = "dynamic-v1";
+
 self.addEventListener("install", function (event) {
   console.log("[Service Worker] Installing Service Worker ...");
   event.waitUntil(
-    caches.open("static").then(function (cache) {
+    caches.open(CACHE_STATIC_NAME).then(function (cache) {
       console.log("[Service Worker] precaching app shell");
       cache.addAll([
         "/",
@@ -12,7 +15,7 @@ self.addEventListener("install", function (event) {
         "/src/js/fetch.js",
         "/src/js/promise.js",
         "/src/js/material.min.js",
-        "src/images/main-image.jpg",
+        "/src/images/main-image.jpg",
         "/src/css/app.css",
         "/src/css/feed.css",
         "https://fonts.googleapis.com/css?family=Roboto:400,700",
@@ -25,6 +28,19 @@ self.addEventListener("install", function (event) {
 
 self.addEventListener("activate", function (event) {
   console.log("[Service Worker] Activating Service Worker ....");
+  event.waitUntil(
+    caches.keys().then(function (keylist) {
+      return Promise.all(
+        keylist.map(function (key) {
+          if (key !== CACHE_STATIC_NAME && key !== CACHE_DYNAMIC_NAME) {
+            caches.delete(key);
+            console.log(`[Service Worker] removing cache ${key}`);
+          }
+        })
+      );
+    })
+  );
+
   return self.clients.claim();
 });
 
@@ -38,7 +54,7 @@ self.addEventListener("fetch", function (event) {
       } else {
         return fetch(event.request).then(function (res) {
           return caches
-            .open("dynamic")
+            .open(CACHE_DYNAMIC_NAME)
             .then(function (cache) {
               cache.put(event.request.url, res.clone());
               return res;
