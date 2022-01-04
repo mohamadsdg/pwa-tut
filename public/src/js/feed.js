@@ -42,7 +42,11 @@ function onSaveButtonClicked(event) {
     });
   }
 }
-
+function clearCard() {
+  while (sharedMomentsArea.hasChildNodes()) {
+    sharedMomentsArea.removeChild(sharedMomentsArea.lastChild());
+  }
+}
 function createCard() {
   var cardWrapper = document.createElement("div");
   cardWrapper.className = "shared-moment-card mdl-card mdl-shadow--2dp";
@@ -70,10 +74,32 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 
-fetch("https://httpbin.org/get")
+var url = "https://httpbin.org/get";
+var networkDataRecived = false;
+
+fetch(url)
   .then(function (res) {
     return res.json();
   })
   .then(function (data) {
+    console.log("from web data", data);
+    networkDataRecived = true;
+    clearCard();
     createCard();
   });
+
+if ("caches" in window) {
+  caches
+    .match(url)
+    .then((response) => {
+      console.log("from cache response", response);
+      if (response) return response.json();
+    })
+    .then((data) => {
+      console.log("from cache data", data);
+      if (!networkDataRecived) {
+        clearCard();
+        createCard();
+      }
+    });
+}
