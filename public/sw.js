@@ -1,4 +1,4 @@
-var CACHE_STATIC_NAME = "static-v4.3.1";
+var CACHE_STATIC_NAME = "static-v4.4";
 var CACHE_DYNAMIC_NAME = "dynamic-v1";
 
 self.addEventListener("install", function (event) {
@@ -68,7 +68,13 @@ self.addEventListener("activate", function (event) {
 // });
 
 // cache only
+// self.addEventListener("fetch", function (event) {
+//   console.log("[Service Worker] Fetching something ....", event);
+//   event.respondWith(caches.match(event.request));
+// });
+
+// network only
 self.addEventListener("fetch", function (event) {
   console.log("[Service Worker] Fetching something ....", event);
-  event.respondWith(caches.match(event.request));
+  event.respondWith(fetch(event.request));
 });
