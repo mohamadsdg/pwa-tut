@@ -1,4 +1,4 @@
-var CACHE_STATIC_NAME = "static-v4.4";
+var CACHE_STATIC_NAME = "static-v4.5";
 var CACHE_DYNAMIC_NAME = "dynamic-v1";
 
 self.addEventListener("install", function (event) {
@@ -74,7 +74,25 @@ self.addEventListener("activate", function (event) {
 // });
 
 // network only
+// self.addEventListener("fetch", function (event) {
+//   console.log("[Service Worker] Fetching something ....", event);
+//   event.respondWith(fetch(event.request));
+// });
+
+// network with cache fallback
 self.addEventListener("fetch", function (event) {
-  console.log("[Service Worker] Fetching something ....", event);
-  event.respondWith(fetch(event.request));
+  console.log("[Service Worker] Fetching something ....");
+
+  return event.respondWith(
+    fetch(event.request)
+      .then((res) => {
+        return caches.open(CACHE_DYNAMIC_NAME).then((cache) => {
+          cache.put(event.request.url, res.clone());
+          return res;
+        });
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
+  );
 });
