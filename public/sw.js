@@ -1,4 +1,4 @@
-var CACHE_STATIC_NAME = "static-v1";
+var CACHE_STATIC_NAME = "static-v3.4";
 var CACHE_DYNAMIC_NAME = "dynamic-v1";
 
 self.addEventListener("install", function (event) {
@@ -15,6 +15,7 @@ self.addEventListener("install", function (event) {
         "/src/js/material.min.js",
         "/src/css/app.css",
         "/src/css/feed.css",
+        "/src/images/main-image.jpg",
         "https://fonts.googleapis.com/css?family=Roboto:400,700",
         "https://fonts.googleapis.com/icon?family=Material+Icons",
         "https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css",
@@ -50,7 +51,7 @@ self.addEventListener("fetch", function (event) {
       } else {
         return fetch(event.request).then(function (res) {
           return caches.open(CACHE_DYNAMIC_NAME).then(function (cache) {
-            cache.put(event.request.url, res.clone());
+            // cache.put(event.request.url, res.clone());
             return res;
           });
         });
