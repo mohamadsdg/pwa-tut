@@ -9,13 +9,10 @@ self.addEventListener("install", function (event) {
       cache.addAll([
         "/",
         "/index.html",
-        "/manifest.json",
         "/src/js/app.js",
         "/src/js/feed.js",
-        "/src/js/fetch.js",
         "/src/js/promise.js",
         "/src/js/material.min.js",
-        "/src/images/main-image.jpg",
         "/src/css/app.css",
         "/src/css/feed.css",
         "https://fonts.googleapis.com/css?family=Roboto:400,700",
@@ -40,7 +37,6 @@ self.addEventListener("activate", function (event) {
       );
     })
   );
-
   return self.clients.claim();
 });
 
@@ -53,15 +49,10 @@ self.addEventListener("fetch", function (event) {
         return response;
       } else {
         return fetch(event.request).then(function (res) {
-          return caches
-            .open(CACHE_DYNAMIC_NAME)
-            .then(function (cache) {
-              cache.put(event.request.url, res.clone());
-              return res;
-            })
-            .catch((err) => {
-              console.log("[Service Worker] dynamicCaching ", err);
-            });
+          return caches.open(CACHE_DYNAMIC_NAME).then(function (cache) {
+            cache.put(event.request.url, res.clone());
+            return res;
+          });
         });
       }
     })
