@@ -1,4 +1,4 @@
-var CACHE_STATIC_NAME = "static-v4.8";
+var CACHE_STATIC_NAME = "static-v4.9.3";
 var CACHE_DYNAMIC_NAME = "dynamic-v1.6";
 var STATIC_ASSET = [
   "/",
