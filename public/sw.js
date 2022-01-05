@@ -1,5 +1,5 @@
 var CACHE_STATIC_NAME = "static-v4.8";
-var CACHE_DYNAMIC_NAME = "dynamic-v1.2";
+var CACHE_DYNAMIC_NAME = "dynamic-v1.6";
 var STATIC_ASSET = [
   "/",
   "/index.html",
@@ -15,6 +15,16 @@ var STATIC_ASSET = [
   "https://fonts.googleapis.com/icon?family=Material+Icons",
   "https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css",
 ];
+
+function trimCache(cacheName, maxItem) {
+  caches.open(cacheName).then((cache) => {
+    return cache.keys().then((keylist) => {
+      if (keylist.length > maxItem) {
+        cache.delete(keylist[0]).then(trimCache(cacheName, maxItem));
+      }
+    });
+  });
+}
 
 self.addEventListener("install", function (event) {
   console.log("[Service Worker] Installing Service Worker ...");
@@ -109,13 +119,14 @@ function isInArray(string, array) {
 
 // cache then network
 self.addEventListener("fetch", function (event) {
-  console.log("event.request.url", event.request.url);
+  // console.log("event.request.url", event.request.url);
   var url = "https://httpbin.org/get";
 
   if (event.request.url.indexOf(url) > -1) {
     return event.respondWith(
       fetch(event.request).then(function (res) {
         return caches.open(CACHE_DYNAMIC_NAME).then(function (cache) {
+          trimCache(CACHE_DYNAMIC_NAME, 3);
           cache.put(event.request.url, res.clone());
           return res;
         });
@@ -132,6 +143,7 @@ self.addEventListener("fetch", function (event) {
           return fetch(event.request)
             .then(function (res) {
               return caches.open(CACHE_DYNAMIC_NAME).then(function (cache) {
+                trimCache(CACHE_DYNAMIC_NAME, 3);
                 cache.put(event.request.url, res.clone());
                 return res;
               });
