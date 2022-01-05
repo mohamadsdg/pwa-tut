@@ -1,4 +1,4 @@
-var CACHE_STATIC_NAME = "static-v4.9.3";
+var CACHE_STATIC_NAME = "static-v5";
 var CACHE_DYNAMIC_NAME = "dynamic-v1.6";
 var STATIC_ASSET = [
   "/",
@@ -120,7 +120,8 @@ function isInArray(string, array) {
 // cache then network
 self.addEventListener("fetch", function (event) {
   // console.log("event.request.url", event.request.url);
-  var url = "https://httpbin.org/get";
+  var url =
+    "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json";
 
   if (event.request.url.indexOf(url) > -1) {
     return event.respondWith(

@@ -31,7 +31,6 @@ function openCreatePostModal() {
   //     //   registration[i].unregister();
   //     // }
   //   });
-  }
 }
 
 function closeCreatePostModal() {
@@ -57,23 +56,23 @@ function clearCard() {
     sharedMomentsArea.removeChild(sharedMomentsArea.lastChild());
   }
 }
-function createCard() {
+function createCard(data) {
   var cardWrapper = document.createElement("div");
   cardWrapper.className = "shared-moment-card mdl-card mdl-shadow--2dp";
   var cardTitle = document.createElement("div");
   cardTitle.className = "mdl-card__title";
-  cardTitle.style.backgroundImage = 'url("/src/images/sf-boat.jpg")';
+  cardTitle.style.backgroundImage = "url(" + data.image + ")";
   cardTitle.style.backgroundSize = "cover";
   cardTitle.style.height = "180px";
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement("h2");
   cardTitleTextElement.style.color = "white";
   cardTitleTextElement.className = "mdl-card__title-text";
-  cardTitleTextElement.textContent = "San Francisco Trip";
+  cardTitleTextElement.textContent = data.title;
   cardTitle.appendChild(cardTitleTextElement);
   var cardSupportingText = document.createElement("div");
   cardSupportingText.className = "mdl-card__supporting-text";
-  cardSupportingText.textContent = "In San Francisco";
+  cardSupportingText.textContent = data.location;
   cardSupportingText.style.textAlign = "center";
   var cardSaveButton = document.createElement("button");
   cardSaveButton.textContent = "Save";
@@ -83,8 +82,15 @@ function createCard() {
   componentHandler.upgradeElement(cardWrapper);
   sharedMomentsArea.appendChild(cardWrapper);
 }
-
-var url = "https://httpbin.org/get";
+function updateUI(data) {
+  console.log("updateUI", data);
+  clearCard();
+  for (var y = 0; y < data.length; y++) {
+    createCard(data[y]);
+  }
+}
+var url =
+  "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json";
 var networkDataRecived = false;
 
 fetch(url)
@@ -94,8 +100,13 @@ fetch(url)
   .then(function (data) {
     console.log("from web data", data);
     networkDataRecived = true;
-    clearCard();
-    createCard();
+    var dataArray = [];
+    for (var key in data) {
+      if (Object.hasOwnProperty.call(data, key)) {
+        dataArray.push(data[key]);
+      }
+    }
+    updateUI(dataArray);
   });
 
 if ("caches" in window) {
@@ -105,11 +116,16 @@ if ("caches" in window) {
       console.log("from cache response", response);
       if (response) return response.json();
     })
-    .then((data) => {
+    .then(function (data) {
       console.log("from cache data", data);
       if (!networkDataRecived) {
-        clearCard();
-        createCard();
+        var dataArray = [];
+        for (var key in data) {
+          if (Object.hasOwnProperty.call(data, key)) {
+            dataArray.push(data[key]);
+          }
+        }
+        updateUI(dataArray);
       }
     });
 }
