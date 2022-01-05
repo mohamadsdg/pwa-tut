@@ -1,26 +1,27 @@
-var CACHE_STATIC_NAME = "static-v4.6";
-var CACHE_DYNAMIC_NAME = "dynamic-v1.1";
+var CACHE_STATIC_NAME = "static-v4.8";
+var CACHE_DYNAMIC_NAME = "dynamic-v1.2";
+var STATIC_ASSET = [
+  "/",
+  "/index.html",
+  "/offline.html",
+  "/src/js/app.js",
+  "/src/js/feed.js",
+  "/src/js/promise.js",
+  "/src/js/material.min.js",
+  "/src/css/app.css",
+  "/src/css/feed.css",
+  "/src/images/main-image.jpg",
+  "https://fonts.googleapis.com/css?family=Roboto:400,700",
+  "https://fonts.googleapis.com/icon?family=Material+Icons",
+  "https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css",
+];
 
 self.addEventListener("install", function (event) {
   console.log("[Service Worker] Installing Service Worker ...");
   event.waitUntil(
     caches.open(CACHE_STATIC_NAME).then(function (cache) {
       console.log("[Service Worker] precaching app shell");
-      cache.addAll([
-        "/",
-        "/index.html",
-        "/offline.html",
-        "/src/js/app.js",
-        "/src/js/feed.js",
-        "/src/js/promise.js",
-        "/src/js/material.min.js",
-        "/src/css/app.css",
-        "/src/css/feed.css",
-        "/src/images/main-image.jpg",
-        "https://fonts.googleapis.com/css?family=Roboto:400,700",
-        "https://fonts.googleapis.com/icon?family=Material+Icons",
-        "https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css",
-      ]);
+      cache.addAll(STATIC_ASSET);
     })
   );
 });
@@ -97,8 +98,18 @@ self.addEventListener("activate", function (event) {
 //   );
 // });
 
+function isInArray(string, array) {
+  for (let index = 0; index < array.length; index++) {
+    if (array[index] == string) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // cache then network
 self.addEventListener("fetch", function (event) {
+  console.log("event.request.url", event.request.url);
   var url = "https://httpbin.org/get";
 
   if (event.request.url.indexOf(url) > -1) {
@@ -110,6 +121,8 @@ self.addEventListener("fetch", function (event) {
         });
       })
     );
+  } else if (isInArray(event.request.url, STATIC_ASSET)) {
+    return event.respondWith(caches.match(event.request));
   } else {
     return event.respondWith(
       caches.match(event.request).then((response) => {
