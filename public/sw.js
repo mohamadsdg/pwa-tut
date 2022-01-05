@@ -16,15 +16,15 @@ var STATIC_ASSET = [
   "https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css",
 ];
 
-function trimCache(cacheName, maxItem) {
-  caches.open(cacheName).then((cache) => {
-    return cache.keys().then((keylist) => {
-      if (keylist.length > maxItem) {
-        cache.delete(keylist[0]).then(trimCache(cacheName, maxItem));
-      }
-    });
-  });
-}
+// function trimCache(cacheName, maxItem) {
+//   caches.open(cacheName).then((cache) => {
+//     return cache.keys().then((keylist) => {
+//       if (keylist.length > maxItem) {
+//         cache.delete(keylist[0]).then(trimCache(cacheName, maxItem));
+//       }
+//     });
+//   });
+// }
 
 self.addEventListener("install", function (event) {
   console.log("[Service Worker] Installing Service Worker ...");
@@ -126,7 +126,7 @@ self.addEventListener("fetch", function (event) {
     return event.respondWith(
       fetch(event.request).then(function (res) {
         return caches.open(CACHE_DYNAMIC_NAME).then(function (cache) {
-          trimCache(CACHE_DYNAMIC_NAME, 3);
+          // trimCache(CACHE_DYNAMIC_NAME, 3);
           cache.put(event.request.url, res.clone());
           return res;
         });
@@ -143,7 +143,7 @@ self.addEventListener("fetch", function (event) {
           return fetch(event.request)
             .then(function (res) {
               return caches.open(CACHE_DYNAMIC_NAME).then(function (cache) {
-                trimCache(CACHE_DYNAMIC_NAME, 3);
+                // trimCache(CACHE_DYNAMIC_NAME, 3);
                 cache.put(event.request.url, res.clone());
                 return res;
               });
