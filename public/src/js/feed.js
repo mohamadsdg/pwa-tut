@@ -109,23 +109,31 @@ fetch(url)
     updateUI(dataArray);
   });
 
-if ("caches" in window) {
-  caches
-    .match(url)
-    .then((response) => {
-      console.log("from cache response", response);
-      if (response) return response.json();
-    })
-    .then(function (data) {
-      console.log("from cache data", data);
-      if (!networkDataRecived) {
-        var dataArray = [];
-        for (var key in data) {
-          if (Object.hasOwnProperty.call(data, key)) {
-            dataArray.push(data[key]);
-          }
-        }
-        updateUI(dataArray);
-      }
-    });
+if ("indexedDB" in window) {
+  readAllData("posts").then((post) => {
+    if (!networkDataRecived) {
+      updateUI(post);
+    }
+  });
 }
+
+// if ("caches" in window) {
+//   caches
+//     .match(url)
+//     .then((response) => {
+//       console.log("from cache response", response);
+//       if (response) return response.json();
+//     })
+//     .then(function (data) {
+//       console.log("from cache data", data);
+//       if (!networkDataRecived) {
+//         var dataArray = [];
+//         for (var key in data) {
+//           if (Object.hasOwnProperty.call(data, key)) {
+//             dataArray.push(data[key]);
+//           }
+//         }
+//         updateUI(dataArray);
+//       }
+//     });
+// }

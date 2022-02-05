@@ -1,7 +1,8 @@
 importScripts("/src/js/idb.js");
+importScripts("/src/js/utility.js");
 
-var CACHE_STATIC_NAME = "static-v1";
-var CACHE_DYNAMIC_NAME = "dynamic-v1";
+var CACHE_STATIC_NAME = "static-v2.1";
+var CACHE_DYNAMIC_NAME = "dynamic-v2.1";
 var STATIC_ASSET = [
   "/",
   "/index.html",
@@ -137,12 +138,7 @@ self.addEventListener("fetch", function (event) {
         var clonedRes = res.clone();
         clonedRes.json().then(function (data) {
           for (var key in data) {
-            dbPromise.then(function (db) {
-              var tx = db.transaction("posts", "readwrite");
-              var store = tx.objectStore("posts");
-              store.put(data[key]);
-              return tx.complete;
-            });
+            writeDate("posts", data[key]);
           }
         });
         return res;
