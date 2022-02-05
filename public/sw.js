@@ -1,5 +1,7 @@
-var CACHE_STATIC_NAME = "static-v5";
-var CACHE_DYNAMIC_NAME = "dynamic-v1.6";
+importScripts("/src/js/idb.js");
+
+var CACHE_STATIC_NAME = "static-v1";
+var CACHE_DYNAMIC_NAME = "dynamic-v1";
 var STATIC_ASSET = [
   "/",
   "/index.html",
@@ -25,6 +27,12 @@ var STATIC_ASSET = [
 //     });
 //   });
 // }
+
+var dbPromise = idb.open("posts-store", 1, function (db) {
+  if (!db.objectStoreNames.contains("posts")) {
+    db.createObjectStore("posts", { keyPath: "id" });
+  }
+});
 
 self.addEventListener("install", function (event) {
   console.log("[Service Worker] Installing Service Worker ...");
@@ -124,13 +132,20 @@ self.addEventListener("fetch", function (event) {
     "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json";
 
   if (event.request.url.indexOf(url) > -1) {
-    return event.respondWith(
+    event.respondWith(
       fetch(event.request).then(function (res) {
-        return caches.open(CACHE_DYNAMIC_NAME).then(function (cache) {
-          // trimCache(CACHE_DYNAMIC_NAME, 3);
-          cache.put(event.request.url, res.clone());
-          return res;
+        var clonedRes = res.clone();
+        clonedRes.json().then(function (data) {
+          for (var key in data) {
+            dbPromise.then(function (db) {
+              var tx = db.transaction("posts", "readwrite");
+              var store = tx.objectStore("posts");
+              store.put(data[key]);
+              return tx.complete;
+            });
+          }
         });
+        return res;
       })
     );
   } else if (isInArray(event.request.url, STATIC_ASSET)) {
