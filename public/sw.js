@@ -1,7 +1,7 @@
 importScripts("/src/js/idb.js");
 importScripts("/src/js/utility.js");
 
-var CACHE_STATIC_NAME = "static-v2.4";
+var CACHE_STATIC_NAME = "static-v2.8";
 var CACHE_DYNAMIC_NAME = "dynamic-v2.1";
 var STATIC_ASSET = [
   "/",
@@ -143,6 +143,10 @@ self.addEventListener("fetch", function (event) {
           .then(function (data) {
             for (var key in data) {
               writeDate("posts", data[key]);
+              // .then((x) => {
+              //   console.log("writeDate", key);
+              //   deletedItemFromData("posts", key);
+              // });
             }
           });
         return res;
