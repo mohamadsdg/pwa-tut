@@ -6,7 +6,8 @@
   "scripts": {
     "start": "http-server -c-1",
     "firebase:login": "firebase login",
-    "firebase:init": "firebase init"
+    "firebase:init": "firebase init",
+    "firebase:deploy": "firebase deploy"
   },
   "keywords": [
     "pwa",
