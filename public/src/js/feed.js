@@ -152,5 +152,35 @@ form.addEventListener("submit", function (event) {
     alert("Please Enter valid data !");
     return;
   }
+  if ("serviceWorker" in navigator && "SyncManager" in window) {
+    navigator.serviceWorker.ready
+      .then((sw) => {
+        var post = {
+          id: new Date().toISOString(),
+          title: titleInput.value,
+          location: locationInput.value,
+        };
+        return writeDate("synce-posts", post)
+          .then(() => {
+            return sw.sync.register("sync-new-post");
+          })
+          .then(() => {
+            var snackBarContainer = document.querySelector(
+              "#confirmation-toast"
+            );
+            var data = { message: "Your Post Was Saved for syncing!" };
+            snackBarContainer.MaterialSnackback.showSnackbar(data);
+          })
+          .catch(() => {
+            console.log("writeDate Sync-Post failed :(");
+          });
+      })
+      .then(() => {
+        console.log("Sync registered!");
+      })
+      .catch(() => {
+        console.log("Sync registration failed :(");
+      });
+  }
   closeCreatePostModal();
 });
