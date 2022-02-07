@@ -128,7 +128,7 @@ function isInArray(string, array) {
 
 // cache then network
 self.addEventListener("fetch", function (event) {
-  // console.log("event.request.url", event.request.url);
+  // console.log("[Service Worker] FetchEvent", event);
   var url =
     "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json";
 
