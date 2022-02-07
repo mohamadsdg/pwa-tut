@@ -32,7 +32,7 @@ function clearAllData(st) {
 }
 
 function deletedItemFromData(st, id) {
-  dbPromise
+  return dbPromise
     .then(function (db) {
       var tx = db.transaction(st, "readwrite");
       var store = tx.objectStore(st);

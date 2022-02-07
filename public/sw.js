@@ -1,7 +1,7 @@
 importScripts("/src/js/idb.js");
 importScripts("/src/js/utility.js");
 
-var CACHE_STATIC_NAME = "static-v3.6";
+var CACHE_STATIC_NAME = "static-v4";
 var CACHE_DYNAMIC_NAME = "dynamic-v2.1";
 var STATIC_ASSET = [
   "/",
@@ -172,6 +172,46 @@ self.addEventListener("fetch", function (event) {
               return caches.open(CACHE_STATIC_NAME).then((cache) => {
                 return cache.match("/offline.html");
               });
+            });
+        }
+      })
+    );
+  }
+});
+
+self.addEventListener("sync", function (event) {
+  console.log("[Service Worker] Background Syncing", event);
+  if (event.tag === "sync-new-post") {
+    event.waitUntil(
+      readAllData("synce-posts").then((data) => {
+        for (const x of data) {
+          fetch(
+            "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              body: JSON.stringify({
+                id: x.id,
+                title: x.title,
+                location: x.location,
+                image:
+                  "https://firebasestorage.googleapis.com/v0/b/pwgram-30323.appspot.com/o/sf-boat.jpg?alt=media&token=c2fa4ba0-bfca-419b-acc9-b016e78d956c",
+              }),
+            }
+          )
+            .then((res) => {
+              console.log("Send Data", res);
+              if (res.ok) {
+                deletedItemFromData("synce-posts", x.id).then(() => {
+                  console.log(`clear sync-post ${x.id} after send successfull`);
+                });
+              }
+            })
+            .catch((err) => {
+              console.error("Error while sending data", err);
             });
         }
       })

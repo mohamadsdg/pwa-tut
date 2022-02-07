@@ -97,6 +97,30 @@ function updateUI(data) {
     createCard(data[i]);
   }
 }
+
+function sendData() {
+  fetch(
+    "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        id: new Date().toISOString(),
+        title: titleInput.value,
+        location: locationInput.value,
+        image:
+          "https://firebasestorage.googleapis.com/v0/b/pwgram-30323.appspot.com/o/sf-boat.jpg?alt=media&token=c2fa4ba0-bfca-419b-acc9-b016e78d956c",
+      }),
+    }
+  ).then((res) => {
+    console.log("Send Data", res);
+    updateUI();
+  });
+}
+
 var url =
   "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json";
 var networkDataRecived = false;
@@ -160,7 +184,7 @@ form.addEventListener("submit", function (event) {
           title: titleInput.value,
           location: locationInput.value,
         };
-        return writeDate("synce-posts", post)
+        writeDate("synce-posts", post)
           .then(() => {
             return sw.sync.register("sync-new-post");
           })
@@ -169,7 +193,7 @@ form.addEventListener("submit", function (event) {
               "#confirmation-toast"
             );
             var data = { message: "Your Post Was Saved for syncing!" };
-            snackBarContainer.MaterialSnackback.showSnackbar(data);
+            snackBarContainer.MaterialSnackbar.showSnackbar(data);
           })
           .catch(() => {
             console.log("writeDate Sync-Post failed :(");
@@ -181,6 +205,8 @@ form.addEventListener("submit", function (event) {
       .catch(() => {
         console.log("Sync registration failed :(");
       });
+  } else {
+    sendData();
   }
   closeCreatePostModal();
 });
