@@ -25,12 +25,36 @@ window.addEventListener("beforeinstallprompt", function (event) {
   return false;
 });
 
+function displayConfirmNotification() {
+  // new Notification("successfully subscribed!", {
+  //   body: "you successfully subscribed to our Notification service!",
+  // });
+
+  if ("serviceWorker" in navigator) {
+    var option = {
+      body: "you successfully subscribed to our Notification service!",
+      icon: "/src/images/icons/app-icon-96x96.png",
+      image: "/src/images/sf-boat.jpg",
+      dir: "ltr",
+      lang: "en-US",
+      vibrate: [100, 50, 200],
+      badge: "/src/images/icons/app-icon-96x96.png",
+      tag: "confirm-notify",
+      renotify: false,
+    };
+    navigator.serviceWorker.ready.then((swreg) => {
+      swreg.showNotification("successfully subscribed (from sw)!", option);
+    });
+  }
+}
+
 function askForNotification() {
   Notification.requestPermission().then((rsp) => {
     console.log("User Choice", rsp);
     if (rsp !== "granted") {
       console.log("not granted permission for notification");
     } else {
+      displayConfirmNotification();
     }
   });
 }
