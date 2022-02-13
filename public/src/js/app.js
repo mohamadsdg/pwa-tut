@@ -59,17 +59,48 @@ function displayConfirmNotification() {
     });
   }
 }
+
 function configurePushSub() {
   if (!("serviceWorker" in navigator)) {
     return;
   }
+  var reg;
   navigator.serviceWorker.ready
     .then((sw) => {
+      reg = sw;
       return sw.pushManager.getSubscription();
     })
     .then((sub) => {
-      if (sub !== null) {
+      if (sub === null) {
+        var vapidPublicKey =
+          "BHqSssB1Wgf_fSpKtfVIhY2IloLo6982UPh52L1xowNpO1STo5w0pEVOIp9A4Wfv0YR1qNpXM0esW5REM6VgY_4";
         // Create a Subscription
+        return reg.pushManager
+          .subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+          })
+          .then((newSub) => {
+            return fetch(
+              "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/subscriptions.json",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                },
+                body: JSON.stringify(newSub),
+              }
+            );
+          })
+          .then((rsp) => {
+            if (rsp.ok) {
+              displayConfirmNotification();
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
       } else {
         // we have got a Subscription
       }

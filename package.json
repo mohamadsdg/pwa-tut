@@ -7,7 +7,8 @@
     "start": "http-server -c-1",
     "firebase:login": "firebase login",
     "firebase:init": "firebase init",
-    "firebase:deploy": "firebase deploy"
+    "firebase:deploy": "firebase deploy",
+    "vapid": "web-push generate-vapid-keys"
   },
   "keywords": [
     "pwa",
@@ -21,6 +22,8 @@
   "license": "ISC",
   "devDependencies": {
     "firebase-tools": "^10.1.4",
-    "http-server": "^14.0.0"
-  }
+    "http-server": "^14.0.0",
+    "web-push": "^3.4.5"
+  },
+  "dependencies": {}
 }
