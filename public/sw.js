@@ -1,7 +1,7 @@
 importScripts("/src/js/idb.js");
 importScripts("/src/js/utility.js");
 
-var CACHE_STATIC_NAME = "static-v4.4";
+var CACHE_STATIC_NAME = "static-v4.6";
 var CACHE_DYNAMIC_NAME = "dynamic-v2.1";
 var STATIC_ASSET = [
   "/",
@@ -186,7 +186,8 @@ self.addEventListener("sync", function (event) {
       readAllData("synce-posts").then((data) => {
         for (const x of data) {
           fetch(
-            "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
+            // "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
+            "http://localhost:3000/api/savePost",
             {
               method: "POST",
               headers: {
@@ -203,7 +204,7 @@ self.addEventListener("sync", function (event) {
             }
           )
             .then((res) => {
-              console.log("Send Data", res);
+              // console.log("Send Data", res);
               if (res.ok) {
                 deletedItemFromData("synce-posts", x.id).then(() => {
                   console.log(`clear sync-post ${x.id} after send successfull`);
@@ -232,4 +233,15 @@ self.addEventListener("notificationclick", function (event) {
 
 self.addEventListener("notificationclose", function (event) {
   console.log("[Service Worker] Notification Close", event);
+});
+
+self.addEventListener("push", function (event) {
+  var obj = event.data.json();
+  console.log("[Service Worker] Push Notification received", event, obj);
+  const promiseChain = self.registration.showNotification(obj.title, {
+    body: obj.content,
+    icon: "/src/images/icons/app-icon-96x96.png",
+    badge: "/src/images/icons/app-icon-96x96.png",
+  });
+  event.waitUntil(promiseChain);
 });

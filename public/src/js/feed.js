@@ -100,7 +100,8 @@ function updateUI(data) {
 
 function sendData() {
   fetch(
-    "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
+    // "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
+    "http://localhost:3000/api/savePost",
     {
       method: "POST",
       headers: {
