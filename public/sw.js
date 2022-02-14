@@ -34,7 +34,8 @@ var dbPromise = idb.open("posts-store", 1, function (db) {
     db.createObjectStore("posts", { keyPath: "id" });
   }
 });
-var urlToOpen = new URL("http://localhost:8081", self.location.origin).href;
+var urlToOpen = (defualtPage = "/") =>
+  new URL(defualtPage, self.location.origin).href;
 
 self.addEventListener("install", function (event) {
   console.log("[Service Worker] Installing Service Worker ...");
@@ -223,6 +224,7 @@ self.addEventListener("sync", function (event) {
 
 self.addEventListener("notificationclick", function (event) {
   console.log("[Service Worker] Notification Click", event);
+  const notifData = event.notification.data;
 
   if (event.action === "confirm") {
     console.log("confirm action was chosen");
@@ -240,7 +242,7 @@ self.addEventListener("notificationclick", function (event) {
         console.log("windowClients", windowClients);
         for (let i = 0; i < windowClients.length; i++) {
           const windowClient = windowClients[i];
-          if (windowClient.url === urlToOpen) {
+          if (windowClient.url === urlToOpen(notifData.openUrl)) {
             matchingClient = windowClient;
             break;
           }
@@ -248,7 +250,7 @@ self.addEventListener("notificationclick", function (event) {
         if (matchingClient) {
           return matchingClient.focus();
         } else {
-          return clients.openWindow(urlToOpen);
+          return clients.openWindow(urlToOpen(notifData.openUrl));
         }
       });
 
@@ -268,6 +270,9 @@ self.addEventListener("push", function (event) {
     body: obj.content,
     icon: "/src/images/icons/app-icon-96x96.png",
     badge: "/src/images/icons/app-icon-96x96.png",
+    data: {
+      openUrl: obj.url,
+    },
   });
   event.waitUntil(promiseChain);
 });
