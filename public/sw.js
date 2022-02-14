@@ -34,6 +34,7 @@ var dbPromise = idb.open("posts-store", 1, function (db) {
     db.createObjectStore("posts", { keyPath: "id" });
   }
 });
+var urlToOpen = new URL("http://localhost:8081", self.location.origin).href;
 
 self.addEventListener("install", function (event) {
   console.log("[Service Worker] Installing Service Worker ...");
@@ -222,11 +223,36 @@ self.addEventListener("sync", function (event) {
 
 self.addEventListener("notificationclick", function (event) {
   console.log("[Service Worker] Notification Click", event);
+
   if (event.action === "confirm") {
     console.log("confirm action was chosen");
     event.notification.close();
   } else {
-    console.log(event.action);
+    // console.log(event.action);
+
+    const promiseChain = clients
+      .matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      })
+      .then((windowClients) => {
+        let matchingClient = null;
+        console.log("windowClients", windowClients);
+        for (let i = 0; i < windowClients.length; i++) {
+          const windowClient = windowClients[i];
+          if (windowClient.url === urlToOpen) {
+            matchingClient = windowClient;
+            break;
+          }
+        }
+        if (matchingClient) {
+          return matchingClient.focus();
+        } else {
+          return clients.openWindow(urlToOpen);
+        }
+      });
+
+    event.waitUntil(promiseChain);
     event.notification.close();
   }
 });
