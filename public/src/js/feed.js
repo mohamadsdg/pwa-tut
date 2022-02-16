@@ -8,11 +8,61 @@ var form = document.querySelector("form");
 var titleInput = document.querySelector("#title");
 var locationInput = document.querySelector("#location");
 
+var videoPlayer = document.querySelector("#player");
+var canvasElement = document.querySelector("#canvas");
+var captureButton = document.querySelector("#capture-btn");
+var imagePicker = document.querySelector("#image-picker");
+var imagePickerArea = document.querySelector("#pick-image");
+
+/**
+ * polyfills
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#using_the_new_api_in_older_browsers
+ */
+function initializeMedia() {
+  console.log("navigator->", navigator.mediaDevices);
+  if (navigator.mediaDevices === undefined) {
+    navigator.mediaDevices = {};
+  }
+  if (navigator.mediaDevices.getUserMedia === undefined) {
+    navigator.mediaDevices.getUserMedia = function (constraints) {
+      var getUserMedia =
+        navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+      if (!getUserMedia) {
+        return Promise.reject(
+          new Error("getUserMedia is not implemented in this browser")
+        );
+      }
+      return new Promise(function (resolve, reject) {
+        getUserMedia.call(navigator, constraints, resolve, reject);
+      });
+    };
+  }
+  navigator.mediaDevices
+    .getUserMedia({ video: true })
+    .then((stream) => {
+      if ("srcObject" in videoPlayer) {
+        videoPlayer.srcObject = stream;
+      } else {
+        // Avoid using this in new browsers, as it is going away.
+        videoPlayer.src = window.URL.createObjectURL(stream);
+      }
+      videoPlayer.style.display = "block";
+    })
+    .catch(function (err) {
+      videoPlayer.style.display = "block";
+      console.log(err.name + ": " + err.message);
+    });
+}
+
 function openCreatePostModal() {
   // createPostArea.style.display = 'block';
   // setTimeout(function() {
   createPostArea.style.transform = "translateY(0)";
   // }, 1);
+
+  initializeMedia();
+
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
