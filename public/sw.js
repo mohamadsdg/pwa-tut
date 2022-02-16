@@ -1,7 +1,7 @@
 importScripts("/src/js/idb.js");
 importScripts("/src/js/utility.js");
 
-var CACHE_STATIC_NAME = "static-v5.5";
+var CACHE_STATIC_NAME = "static-v6.4";
 var CACHE_DYNAMIC_NAME = "dynamic-v2.1";
 var STATIC_ASSET = [
   "/",
@@ -187,22 +187,21 @@ self.addEventListener("sync", function (event) {
     event.waitUntil(
       readAllData("synce-posts").then((data) => {
         for (const x of data) {
+          var postData = new FormData();
+          postData.append("id", x.id);
+          postData.append("title", x.title);
+          postData.append("location", x.location);
+          if (x.image) postData.append("file", x.image, x.id + ".png");
+
           fetch(
             // "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
             "http://localhost:3000/api/savePost",
             {
               method: "POST",
+              body: postData,
               headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
+                "Content-Type": "multipart/form-data",
               },
-              body: JSON.stringify({
-                id: x.id,
-                title: x.title,
-                location: x.location,
-                image:
-                  "https://firebasestorage.googleapis.com/v0/b/pwgram-30323.appspot.com/o/sf-boat.jpg?alt=media&token=c2fa4ba0-bfca-419b-acc9-b016e78d956c",
-              }),
             }
           )
             .then((res) => {

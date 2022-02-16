@@ -13,9 +13,11 @@ var canvasElement = document.querySelector("#canvas");
 var captureButton = document.querySelector("#capture-btn");
 var imagePicker = document.querySelector("#image-picker");
 var imagePickerArea = document.querySelector("#pick-image");
+var picture;
 
 /**
  * polyfills
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Taking_still_photos#get_the_video
  * @see https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia#using_the_new_api_in_older_browsers
  */
 function initializeMedia() {
@@ -54,6 +56,30 @@ function initializeMedia() {
       console.log(err.name + ": " + err.message);
     });
 }
+
+captureButton.addEventListener("click", (event) => {
+  // console.log("canvasElement", canvasElement);
+  // console.log("videoPlayer", videoPlayer);
+  canvasElement.style.display = "block";
+  videoPlayer.style.display = "none";
+  captureButton.style.display = "none";
+  var context = canvasElement.getContext("2d");
+  // console.log("context", context);
+  context.drawImage(
+    videoPlayer,
+    0,
+    0,
+    canvas.width,
+    videoPlayer.videoHeight / (videoPlayer.videoWidth / canvas.width)
+  );
+  videoPlayer.srcObject.getVideoTracks().forEach(function (track) {
+    // console.log("track", track);
+    track.stop();
+  });
+
+  picture = dataURItoBlob(canvasElement.toDataURL());
+  // console.log("picture", picture);
+});
 
 function openCreatePostModal() {
   // createPostArea.style.display = 'block';
@@ -100,7 +126,7 @@ closeCreatePostModalButton.addEventListener("click", closeCreatePostModal);
 
 // Currently not in use, allows to save assets in cache on demand otherwise
 function onSaveButtonClicked(event) {
-  console.log("clicked");
+  // console.log("clicked");
   if ("caches" in window) {
     caches.open("user-requested").then(function (cache) {
       cache.add("https://httpbin.org/get");
@@ -149,22 +175,22 @@ function updateUI(data) {
 }
 
 function sendData() {
+  const id = new Date().toISOString();
+  var postData = new FormData();
+  postData.append("id", id);
+  postData.append("title", titleInput.value);
+  postData.append("location", locationInput.value);
+  if (picture) postData.append("file", picture, id + ".png");
+
   fetch(
     // "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
     "http://localhost:3000/api/savePost",
     {
-      method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+        "Content-Type": "multipart/form-data",
       },
-      body: JSON.stringify({
-        id: new Date().toISOString(),
-        title: titleInput.value,
-        location: locationInput.value,
-        image:
-          "https://firebasestorage.googleapis.com/v0/b/pwgram-30323.appspot.com/o/sf-boat.jpg?alt=media&token=c2fa4ba0-bfca-419b-acc9-b016e78d956c",
-      }),
+      method: "POST",
+      body: postData,
     }
   ).then((res) => {
     console.log("Send Data", res);
@@ -234,6 +260,7 @@ form.addEventListener("submit", function (event) {
           id: new Date().toISOString(),
           title: titleInput.value,
           location: locationInput.value,
+          image: picture,
         };
         writeDate("synce-posts", post)
           .then(() => {
