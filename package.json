@@ -8,7 +8,9 @@
     "firebase:login": "firebase login",
     "firebase:init": "firebase init",
     "firebase:deploy": "firebase deploy",
-    "vapid": "web-push generate-vapid-keys"
+    "vapid": "web-push generate-vapid-keys",
+    "wizard-sw": "workbox wizard",
+    "generate-sw": "workbox generateSW"
   },
   "keywords": [
     "pwa",
@@ -23,7 +25,8 @@
   "devDependencies": {
     "firebase-tools": "^10.1.4",
     "http-server": "^14.0.0",
-    "web-push": "^3.4.5"
+    "web-push": "^3.4.5",
+    "workbox-cli": "^6.4.2"
   },
   "dependencies": {}
 }
