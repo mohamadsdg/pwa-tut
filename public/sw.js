@@ -1,7 +1,7 @@
 importScripts("/src/js/idb.js");
 importScripts("/src/js/utility.js");
 
-var CACHE_STATIC_NAME = "static-v6.4";
+var CACHE_STATIC_NAME = "static-v7.8";
 var CACHE_DYNAMIC_NAME = "dynamic-v2.1";
 var STATIC_ASSET = [
   "/",
@@ -199,9 +199,6 @@ self.addEventListener("sync", function (event) {
             {
               method: "POST",
               body: postData,
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
             }
           )
             .then((res) => {

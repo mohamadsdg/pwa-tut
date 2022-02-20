@@ -52,7 +52,9 @@ function initializeMedia() {
       videoPlayer.style.display = "block";
     })
     .catch(function (err) {
-      videoPlayer.style.display = "block";
+      imagePickerArea.style.display = "block";
+      captureButton.style.display = "none";
+
       console.log(err.name + ": " + err.message);
     });
 }
@@ -79,6 +81,10 @@ captureButton.addEventListener("click", (event) => {
 
   picture = dataURItoBlob(canvasElement.toDataURL());
   // console.log("picture", picture);
+});
+
+imagePicker.addEventListener("change", function (event) {
+  picture = event.target.files[0];
 });
 
 function openCreatePostModal() {
@@ -181,14 +187,11 @@ function sendData() {
   postData.append("title", titleInput.value);
   postData.append("location", locationInput.value);
   if (picture) postData.append("file", picture, id + ".png");
-
+  // console.log("postData", postData.get("file"));
   fetch(
     // "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
     "http://localhost:3000/api/savePost",
     {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
       method: "POST",
       body: postData,
     }
