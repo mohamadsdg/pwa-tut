@@ -1,7 +1,7 @@
 importScripts("/src/js/idb.js");
 importScripts("/src/js/utility.js");
 
-var CACHE_STATIC_NAME = "static-v7.8";
+var CACHE_STATIC_NAME = "static-v8.5";
 var CACHE_DYNAMIC_NAME = "dynamic-v2.1";
 var STATIC_ASSET = [
   "/",
@@ -191,6 +191,8 @@ self.addEventListener("sync", function (event) {
           postData.append("id", x.id);
           postData.append("title", x.title);
           postData.append("location", x.location);
+          postData.append("rawLocationLat", x.rawLocation.rawLocationLat);
+          postData.append("rawLocationLng", x.rawLocation.rawLocationLng);
           if (x.image) postData.append("file", x.image, x.id + ".png");
 
           fetch(
@@ -266,6 +268,8 @@ self.addEventListener("push", function (event) {
     body: obj.content,
     icon: "/src/images/icons/app-icon-96x96.png",
     badge: "/src/images/icons/app-icon-96x96.png",
+    vibrate: [100, 50, 200],
+    image: obj.img,
     data: {
       openUrl: obj.url,
     },
