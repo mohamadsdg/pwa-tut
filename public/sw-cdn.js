@@ -1,8 +1,11 @@
 importScripts(
   "https://storage.googleapis.com/workbox-cdn/releases/6.0.2/workbox-sw.js"
 );
+importScripts("/src/js/idb.js");
+importScripts("/src/js/utility.js");
+
 if (workbox) {
-  console.log("[ Hello ] from CDN");
+  console.log("[ Hello ] from CDN", workbox);
   workbox.setConfig({
     debug: true,
   });
@@ -33,7 +36,7 @@ if (workbox) {
     ExpirationPlugin,
     CacheableResponsePlugin,
   } = wkb;
-
+  console.log("all workbox interface", wkb);
   //#routing
   registerRoute(
     /.*(?:googleapis|gstatic)\.com.*$/,
@@ -64,9 +67,26 @@ if (workbox) {
     })
   );
 
-  //   registerRoute((router) => {
-  //     console.log("router", router);
-  //   });
+  registerRoute(
+    "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
+    (ctx) => {
+      console.log("ctx", ctx);
+      var { event } = ctx;
+      return fetch(event.request).then(function (res) {
+        var clonedRes = res.clone();
+        clearAllData("posts")
+          .then(() => {
+            return clonedRes.json();
+          })
+          .then(function (data) {
+            for (var key in data) {
+              writeDate("posts", data[key]);
+            }
+          });
+        return res;
+      });
+    }
+  );
 
   //#precache
   precacheAndRoute(self.__WB_MANIFEST);
