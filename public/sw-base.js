@@ -31,6 +31,7 @@ define(["./workbox-f683aea5"], function (e) {
   "use strict";
   self.addEventListener("message", (e) => {
     e.data && "SKIP_WAITING" === e.data.type && self.skipWaiting();
-  }),
-    e.precacheAndRoute(self.__WB_MANIFEST);
+  });
+  console.log("e", e);
+  e.precacheAndRoute(self.__WB_MANIFEST);
 });
