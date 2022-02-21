@@ -53,10 +53,20 @@ if (workbox) {
     /.*(?:firebasestorage|localhost:3000).*$/,
     new StaleWhileRevalidate({
       cacheName: "post-image",
+      plugins: [
+        new ExpirationPlugin({
+          // Keep at most 3 entries.
+          maxEntries: 6,
+          // Don't keep any entries for more than 30 days.
+          maxAgeSeconds: 30 * 24 * 60 * 60,
+        }),
+      ],
     })
   );
 
-  registerRoute();
+  //   registerRoute((router) => {
+  //     console.log("router", router);
+  //   });
 
   //#precache
   precacheAndRoute(self.__WB_MANIFEST);
