@@ -14,7 +14,41 @@ var captureButton = document.querySelector("#capture-btn");
 var imagePicker = document.querySelector("#image-picker");
 var imagePickerArea = document.querySelector("#pick-image");
 var picture;
+var locationBtn = document.querySelector("#location-btn");
+var locationLoader = document.querySelector("#location-loader");
+var fetchedLocation = { lat: 0, lng: 0 };
 
+function initializeLocation() {
+  if (navigator.geolocation === undefined) {
+    locationBtn.style.display = "none";
+  }
+}
+
+locationBtn.addEventListener("click", function () {
+  if (!("geolocation" in navigator)) {
+    return;
+  }
+  locationLoader.style.display = "none";
+  locationBtn.style.display = "inline";
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      console.log("geolocation->", pos, pos.coords);
+      var crd = pos.coords;
+      fetchedLocation = { lat: crd.latitude, lng: crd.longitude };
+      locationInput.value = "In Iran";
+      document.querySelector("#manual-location").classList.add("is-focused");
+    },
+    (error) => {
+      console.log(error.name + ": " + error.message);
+      locationBtn.style.display = "inline";
+      locationLoader.style.display = "none";
+      alert("Couldn't fetch location, please enter manually!");
+      fetchedLocation = { lat: 0, lng: 0 };
+    },
+    { timeout: 7000 }
+  );
+});
 /**
  * polyfills
  * @see https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Taking_still_photos#get_the_video
@@ -52,7 +86,9 @@ function initializeMedia() {
       videoPlayer.style.display = "block";
     })
     .catch(function (err) {
-      videoPlayer.style.display = "block";
+      imagePickerArea.style.display = "block";
+      captureButton.style.display = "none";
+
       console.log(err.name + ": " + err.message);
     });
 }
@@ -81,13 +117,18 @@ captureButton.addEventListener("click", (event) => {
   // console.log("picture", picture);
 });
 
+imagePicker.addEventListener("change", function (event) {
+  picture = event.target.files[0];
+});
+
 function openCreatePostModal() {
   // createPostArea.style.display = 'block';
-  // setTimeout(function() {
-  createPostArea.style.transform = "translateY(0)";
-  // }, 1);
+  setTimeout(function () {
+    createPostArea.style.transform = "translateY(0)";
+  }, 1);
 
   initializeMedia();
+  initializeLocation();
 
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -116,8 +157,22 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.transform = "translateY(100vh)";
+  imagePickerArea.style.display = "none";
+  videoPlayer.style.display = "none";
+  canvasElement.style.display = "none";
+  locationBtn.style.display = "inline";
+  locationLoader.style.display = "none";
+  captureButton.style.display = "inline";
   // createPostArea.style.display = 'none';
+
+  if (videoPlayer.srcObject) {
+    videoPlayer.srcObject.getVideoTracks().forEach(function (track) {
+      track.stop();
+    });
+  }
+  setTimeout(function () {
+    createPostArea.style.transform = "translateY(100vh)";
+  }, 1);
 }
 
 shareImageButton.addEventListener("click", openCreatePostModal);
@@ -180,15 +235,14 @@ function sendData() {
   postData.append("id", id);
   postData.append("title", titleInput.value);
   postData.append("location", locationInput.value);
+  postData.append("rawLocationLat", fetchedLocation.lat);
+  postData.append("rawLocationLng", fetchedLocation.lng);
   if (picture) postData.append("file", picture, id + ".png");
-
+  // console.log("postData", postData.get("file"));
   fetch(
     // "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
     "http://localhost:3000/api/savePost",
     {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
       method: "POST",
       body: postData,
     }
@@ -261,6 +315,10 @@ form.addEventListener("submit", function (event) {
           title: titleInput.value,
           location: locationInput.value,
           image: picture,
+          rawLocation: {
+            rawLocationLat: fetchedLocation.lat,
+            rawLocationLng: fetchedLocation.lng,
+          },
         };
         writeDate("synce-posts", post)
           .then(() => {
