@@ -10,7 +10,8 @@
     "firebase:deploy": "firebase deploy",
     "vapid": "web-push generate-vapid-keys",
     "wizard-sw": "workbox wizard",
-    "generate-sw": "workbox generateSW"
+    "generate-sw": "workbox generateSW",
+    "injectManifest-sw": "workbox injectManifest"
   },
   "keywords": [
     "pwa",
