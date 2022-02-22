@@ -4,6 +4,8 @@ importScripts(
 importScripts("/src/js/idb.js");
 importScripts("/src/js/utility.js");
 var FALLBACK_HTML_URL = "/offline.html";
+var urlToOpen = (defualtPage = "/") =>
+  new URL(defualtPage, self.location.origin).href;
 
 if (workbox) {
   console.log("[ Hello ] from CDN", workbox);
@@ -148,3 +150,61 @@ if (workbox) {
 } else {
   console.log("Boo! Workbox failed to load 😬");
 }
+
+// push notification
+self.addEventListener("notificationclick", function (event) {
+  console.log("[Service Worker] Notification Click", event);
+  const notifData = event.notification.data;
+
+  if (event.action === "confirm") {
+    console.log("confirm action was chosen");
+    event.notification.close();
+  } else {
+    // console.log(event.action);
+
+    const promiseChain = clients
+      .matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      })
+      .then((windowClients) => {
+        let matchingClient = null;
+        console.log("windowClients", windowClients);
+        for (let i = 0; i < windowClients.length; i++) {
+          const windowClient = windowClients[i];
+          if (windowClient.url === urlToOpen(notifData.openUrl)) {
+            matchingClient = windowClient;
+            break;
+          }
+        }
+        if (matchingClient) {
+          return matchingClient.focus();
+        } else {
+          return clients.openWindow(urlToOpen(notifData.openUrl));
+        }
+      });
+
+    event.waitUntil(promiseChain);
+    event.notification.close();
+  }
+});
+
+self.addEventListener("notificationclose", function (event) {
+  console.log("[Service Worker] Notification Close", event);
+});
+
+self.addEventListener("push", function (event) {
+  var obj = event.data.json();
+  console.log("[Service Worker] Push Notification received", event, obj);
+  const promiseChain = self.registration.showNotification(obj.title, {
+    body: obj.content,
+    icon: "/src/images/icons/app-icon-96x96.png",
+    badge: "/src/images/icons/app-icon-96x96.png",
+    vibrate: [100, 50, 200],
+    image: obj.img,
+    data: {
+      openUrl: obj.url,
+    },
+  });
+  event.waitUntil(promiseChain);
+});
