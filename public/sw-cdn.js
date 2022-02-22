@@ -17,6 +17,7 @@ if (workbox) {
     ...workbox.strategies,
     ...workbox.cacheableResponse,
     ...workbox.expiration,
+    ...workbox.backgroundSync,
   };
   const {
     clientsClaim,
@@ -36,6 +37,8 @@ if (workbox) {
     CacheExpiration,
     ExpirationPlugin,
     CacheableResponsePlugin,
+    BackgroundSyncPlugin,
+    Queue,
   } = wkb;
   console.log("all workbox interface", wkb);
 
@@ -120,6 +123,24 @@ if (workbox) {
         // });
       }
     })
+  );
+
+  // #bgSync
+  // retry them when future sync events are fired
+  registerRoute(
+    "http://localhost:3000/api/savePost",
+    new NetworkOnly({
+      plugins: [
+        new BackgroundSyncPlugin("sync-new-post", {
+          maxRetentionTime: 24 * 60, // Retry for max of 24 Hours (specified in minutes)
+          onSync: ({ queue }) => {
+            // console.log("[BackgroundSyncPlugin] onSync", queue);
+            queue.replayRequests();
+          },
+        }),
+      ],
+    }),
+    "POST"
   );
 
   self.skipWaiting();

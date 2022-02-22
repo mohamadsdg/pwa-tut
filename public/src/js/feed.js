@@ -307,42 +307,44 @@ form.addEventListener("submit", function (event) {
     alert("Please Enter valid data !");
     return;
   }
-  if ("serviceWorker" in navigator && "SyncManager" in window) {
-    navigator.serviceWorker.ready
-      .then((sw) => {
-        var post = {
-          id: new Date().toISOString(),
-          title: titleInput.value,
-          location: locationInput.value,
-          image: picture,
-          rawLocation: {
-            rawLocationLat: fetchedLocation.lat,
-            rawLocationLng: fetchedLocation.lng,
-          },
-        };
-        writeDate("synce-posts", post)
-          .then(() => {
-            return sw.sync.register("sync-new-post");
-          })
-          .then(() => {
-            var snackBarContainer = document.querySelector(
-              "#confirmation-toast"
-            );
-            var data = { message: "Your Post Was Saved for syncing!" };
-            snackBarContainer.MaterialSnackbar.showSnackbar(data);
-          })
-          .catch(() => {
-            console.log("writeDate Sync-Post failed :(");
-          });
-      })
-      .then(() => {
-        console.log("Sync registered!");
-      })
-      .catch(() => {
-        console.log("Sync registration failed :(");
-      });
-  } else {
-    sendData();
-  }
+  sendData();
+
+  // if ("serviceWorker" in navigator && "SyncManager" in window) {
+  //   navigator.serviceWorker.ready
+  //     .then((sw) => {
+  //       var post = {
+  //         id: new Date().toISOString(),
+  //         title: titleInput.value,
+  //         location: locationInput.value,
+  //         image: picture,
+  //         rawLocation: {
+  //           rawLocationLat: fetchedLocation.lat,
+  //           rawLocationLng: fetchedLocation.lng,
+  //         },
+  //       };
+  //       writeDate("synce-posts", post)
+  //         .then(() => {
+  //           return sw.sync.register("sync-new-post");
+  //         })
+  //         .then(() => {
+  //           var snackBarContainer = document.querySelector(
+  //             "#confirmation-toast"
+  //           );
+  //           var data = { message: "Your Post Was Saved for syncing!" };
+  //           snackBarContainer.MaterialSnackbar.showSnackbar(data);
+  //         })
+  //         .catch(() => {
+  //           console.log("writeDate Sync-Post failed :(");
+  //         });
+  //     })
+  //     .then(() => {
+  //       console.log("Sync registered!");
+  //     })
+  //     .catch(() => {
+  //       console.log("Sync registration failed :(");
+  //     });
+  // } else {
+  //   sendData();
+  // }
   closeCreatePostModal();
 });
