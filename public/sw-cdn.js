@@ -3,6 +3,7 @@ importScripts(
 );
 importScripts("/src/js/idb.js");
 importScripts("/src/js/utility.js");
+var FALLBACK_HTML_URL = "/offline.html";
 
 if (workbox) {
   console.log("[ Hello ] from CDN", workbox);
@@ -37,7 +38,11 @@ if (workbox) {
     CacheableResponsePlugin,
   } = wkb;
   console.log("all workbox interface", wkb);
-  //#routing
+
+  // #precache
+  precacheAndRoute(self.__WB_MANIFEST);
+
+  // #routing
   registerRoute(
     /.*(?:googleapis|gstatic)\.com.*$/,
     new StaleWhileRevalidate({
@@ -70,7 +75,7 @@ if (workbox) {
   registerRoute(
     "https://pwgram-30323-default-rtdb.asia-southeast1.firebasedatabase.app/posts.json",
     (ctx) => {
-      console.log("ctx", ctx);
+      // console.log("ctx", ctx);
       var { event } = ctx;
       return fetch(event.request).then(function (res) {
         var clonedRes = res.clone();
@@ -88,8 +93,34 @@ if (workbox) {
     }
   );
 
-  //#precache
-  precacheAndRoute(self.__WB_MANIFEST);
+  // #setup ofline page
+  // registerRoute(
+  //   (match) => {
+  //     const { request } = match;
+  //     console.log("match", match);
+  //     return request.destination === "document";
+  //   },
+  //   (ctx) => {
+  //     const { event } = ctx;
+  //     console.log("ctx", ctx);
+  //   }
+  // );
+  registerRoute(
+    new NavigationRoute(async (params) => {
+      try {
+        // Attempt a network request.
+        return await new CacheFirst().handle(params);
+      } catch (error) {
+        console.log("registerRoute->NavigationRoute->error", error);
+        // If it fails, return the cached HTML.
+        return matchPrecache(FALLBACK_HTML_URL);
+
+        // return caches.match(FALLBACK_HTML_URL, {
+        //   cacheName: cacheNames.precache,
+        // });
+      }
+    })
+  );
 
   self.skipWaiting();
   clientsClaim();
